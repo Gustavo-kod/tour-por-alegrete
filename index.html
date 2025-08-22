@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Descubra Alegrete</title>
+  <meta name="description" content="Tour virtual por Alegrete com QR Codes: história, áudios, fotos e experiências 3D." />
+
+  <!-- ====== Estilos base: cores e tipografia ====== -->
+  <style>
+    :root {
+      /* Paleta inspirada nas cores do RS + toque moderno */
+      --rs-verde: #1f7a4c;
+      --rs-vermelho: #b11b1b;
+      --rs-dourado: #d4a007;
+      --rs-azul: #1f5fa6;
+      --cinza-900: #0f172a;
+      --cinza-700: #334155;
+      --cinza-500: #64748b;
+      --cinza-200: #e2e8f0;
+      --branco: #ffffff;
+      --bg: #0b1220;
+      --radius: 18px;
+      --shadow: 0 12px 30px rgba(0,0,0,.25);
+      --shadow-soft: 0 6px 18px rgba(0,0,0,.15);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--branco); font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif; }
+    img { max-width: 100%; display: block; border-radius: 14px; }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, 92%); margin: 0 auto; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .6rem; padding: .9rem 1.2rem; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--rs-vermelho), var(--rs-dourado)); color: #100b06; font-weight: 700;
+      box-shadow: var(--shadow); border: none; cursor: pointer; transition: transform .08s ease, filter .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .btn.outline { background: transparent; color: var(--branco); border: 1.5px solid var(--cinza-500); box-shadow: none; }
+
+    /* ====== HERO / Banner ====== */
+    .hero {
+      position: relative; min-height: 70vh; display: grid; place-items: center; text-align: center; overflow: hidden;
+      border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; isolation: isolate;
+    }
+    .hero::before { /* imagem de fundo: troque a URL livremente */
+      content: ""; position: absolute; inset: 0; z-index: -2;
+      background: url("https://images.unsplash.com/photo-1523731407965-2430cd12f5e4?q=80&w=1880&auto=format&fit=crop") center/cover no-repeat;
+      filter: brightness(.65) saturate(1.1);
+    }
+    .hero::after { /* gradiente de overlay */
+      content: ""; position: absolute; inset: 0; z-index: -1;
+      background: radial-gradient(1200px 600px at 50% 75%, rgba(31,122,76,.45), transparent 60%), linear-gradient(to top, rgba(11,18,32,.85), rgba(11,18,32,.10));
+    }
+    .hero h1 { font-size: clamp(1.8rem, 3.5vw + .5rem, 3.4rem); margin: 0 0 1rem; line-height: 1.1; }
+    .hero p { font-size: clamp(1rem, 1.2vw + .3rem, 1.25rem); color: var(--cinza-200); max-width: 720px; margin: 0 auto 1.8rem; }
+    .hero .cta { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ====== Seções base ====== */
+    section { padding: 64px 0; }
+    .section-title { font-size: clamp(1.4rem, 2.2vw + .4rem, 2.2rem); margin: 0 0 .6rem; }
+    .section-sub { color: var(--cinza-200); margin: 0 0 1.6rem; }
+
+    /* ====== Como funciona ====== */
+    .steps { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; align-items: center; }
+    .step-card { grid-column: span 12; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-soft); }
+    .flow { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.6rem; padding: 14px; background: rgba(255,255,255,.04); border-radius: 999px; }
+    @media (min-width: 720px) {
+      .step-card { grid-column: span 6; }
+    }
+
+    /* ====== Cards de Pontos ====== */
+    .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-soft); display: flex; flex-direction: column; }
+    .card .content { padding: 16px; display: grid; gap: 10px; }
+    .badge { display: inline-block; padding: .28rem .6rem; border-radius: 999px; font-size: .78rem; background: linear-gradient(135deg, var(--rs-azul), var(--rs-verde)); }
+
+    /* ====== Páginas internas (SPA simples por hash) ====== */
+    .page { display: none; }
+    .page.active { display: block; }
+    .backbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .backbar .btn { padding: .6rem .9rem; }
+
+    .detail { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-soft); }
+    .detail h3 { margin-top: 0; }
+    .gallery { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+    /* ====== Benefícios ====== */
+    .benefits { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .benefit { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-soft); }
+
+    /* ====== Rodapé ====== */
+    footer { border-top: 1px solid rgba(255,255,255,.08); padding: 28px 0 60px; color: var(--cinza-200); }
+    .partners { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .logo-badge { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); padding: 8px 12px; border-radius: 12px; font-weight: 600; }
+
+    /* util */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- ====== HOME ====== -->
+  <header class="hero" id="home">
+    <div class="container">
+      <h1>Descubra Alegrete de um jeito inovador</h1>
+      <p>Explore a história e a cultura da cidade escaneando QR Codes espalhados pelos pontos turísticos. Acesse áudios narrados, fotos antigas e experiências 3D direto do seu celular.</p>
+      <div class="cta">
+        <button class="btn" onclick="goTo('#pontos')" aria-label="Iniciar Tour Virtual">🚶‍♂️ Iniciar Tour Virtual</button>
+        <a class="btn outline" href="#como-funciona" aria-label="Como funciona">ℹ️ Como funciona</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ====== Como Funciona ====== -->
+    <section id="como-funciona">
+      <div class="container">
+        <h2 class="section-title">Como funciona</h2>
+        <p class="section-sub">O turista encontra <strong>QR Codes</strong> nos pontos da cidade. Ao escanear, abre-se um conteúdo exclusivo com <em>áudio narrado</em>, <em>fotos antigas</em> e, quando disponível, <em>vídeos/3D</em>.</p>
+
+        <div class="steps">
+          <div class="step-card">
+            <h3>1) Encontre o QR Code</h3>
+            <p>Placas estão distribuídas pela cidade (Praça Getúlio Vargas, Catedral, Museus e Monumentos).</p>
+          </div>
+          <div class="step-card">
+            <h3>2) Acesse pelo celular</h3>
+            <p>Escaneie com a câmera do seu smartphone para abrir a página do ponto turístico.</p>
+          </div>
+        </div>
+
+        <div class="flow" aria-label="Fluxo do uso">
+          <span title="QR Code">📍 QR Code</span>
+          <span>→</span>
+          <span title="Celular">📱 Celular</span>
+          <span>→</span>
+          <span title="Mídias">🎧 Áudio / 📷 Foto antiga / 🎥 3D</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== Pontos do Tour ====== -->
+    <section id="pontos">
+      <div class="container">
+        <h2 class="section-title">Pontos do Tour</h2>
+        <p class="section-sub">Clique em um cartão para conhecer a história, ouvir o áudio e ver imagens de cada local.</p>
+
+        <div class="grid">
+          <!-- Igreja Matriz de Alegrete -->
+          <article class="card">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjPWylZcXuDojuA511L_WLTkWliwzvBwyKU5nnUjeNApUG9Rw6dMzVlOaNy_AjKjWWK4KvNBSkQZdr-oK9Sg2l3X-20cdBxuVaWCfkrc3VvAyAqJSc9Haekqi9pb5hlTnA4KE5WXTMY9Xdv/s1600/Alegrete%252C+Igreja+N.Sr%25C2%25AA+da+Concei%25C3%25A7%25C3%25A3o.jpg" alt="Igreja Matriz de Alegrete (imagem ilustrativa)" />
+            <div class="content">
+              <span class="badge">Catedral</span>
+              <h3>Igreja Matriz de Alegrete</h3>
+              <button class="btn" onclick="goTo('#catedral')">Explorar</button>
+            </div>
+          </article>
+
+          <!-- Museu Oswaldo Aranha -->
+          <article class="card">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Museu_Oswaldo_Aranha_-_Pra%C3%A7a_Get%C3%BAlio_Vargas%2C_585.jpg/2560px-Museu_Oswaldo_Aranha_-_Pra%C3%A7a_Get%C3%BAlio_Vargas%2C_585.jpg" alt="Museu Oswaldo Aranha (imagem ilustrativa)" />
+            <div class="content">
+              <span class="badge">Museu</span>
+              <h3>Museu Oswaldo Aranha</h3>
+              <button class="btn" onclick="goTo('#museu')">Explorar</button>
+            </div>
+          </article>
+
+          <!-- Praça Getúlio Vargas -->
+          <article class="card">
+            <img src="https://i.pinimg.com/736x/2b/03/40/2b0340b54170813016f5327b201d8834.jpg" alt="Praça Getúlio Vargas (imagem ilustrativa)" />
+            <div class="content">
+              <span class="badge">Praça</span>
+              <h3>Praça Getúlio Vargas</h3>
+              <button class="btn" onclick="goTo('#praca')">Explorar</button>
+            </div>
+          </article>
+
+          <!-- Monumento Expedicionário -->
+          <article class="card">
+            <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/87/50/1a/praca-central-de-alegre_r.jpg?w=500&h=500&s=1" alt="Monumento Expedicionário (imagem ilustrativa)" />
+            <div class="content">
+              <span class="badge">História</span>
+              <h3>Monumento Expedicionário</h3>
+              <button class="btn" onclick="goTo('#monumentos')">Explorar</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== Páginas Internas: detalhes de cada ponto ====== -->
+    <section id="catedral" class="page container" aria-labelledby="title-catedral">
+      <div class="backbar"><button class="btn outline" onclick="goTo('#pontos')">← Voltar</button></div>
+      <div class="detail">
+        <h3 id="title-catedral">Igreja Matriz de Alegrete</h3>
+        <p>Breve história (exemplo): a Catedral é um marco religioso e arquitetônico, palco de eventos cívicos e culturais. Sua fachada reflete a influência europeia no pampa gaúcho.</p>
+        <audio controls style="width:100%; margin: 10px 0 18px;">
+          <source src="assets/audio/catedral.mp3" type="audio/mpeg" />
+          Seu navegador não suporta o player de áudio.
+        </audio>
+        <div class="gallery">
+          <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjPWylZcXuDojuA511L_WLTkWliwzvBwyKU5nnUjeNApUG9Rw6dMzVlOaNy_AjKjWWK4KvNBSkQZdr-oK9Sg2l3X-20cdBxuVaWCfkrc3VvAyAqJSc9Haekqi9pb5hlTnA4KE5WXTMY9Xdv/s1600/Alegrete%252C+Igreja+N.Sr%25C2%25AA+da+Concei%25C3%25A7%25C3%25A3o.jpg" alt="Foto antiga da Catedral (ilustrativa)" />
+          <img src="https://travelterapia.com.br/wp-content/uploads/2021/09/Alegrete-Igreja-Matriz.jpeg" alt="Foto atual da Catedral (ilustrativa)" />
+          <img src="https://www.alegretetudo.com.br/wp-content/uploads/2021/07/alegretetudo-igreja-matriz-mais-que-um-templo-de-fe-uma-obra-de-arte-da-arquitetura-gotica-whatsapp-image-2021-06-29-at-11.43.00-2-819x1024.jpeg" alt="Detalhe interno (ilustrativo)" />
+        </div>
+        <p style="margin-top:14px"><button class="btn" onclick="alert('Simulação AR em breve!')">🕶️ Simulação em Realidade Aumentada (beta)</button></p>
+      </div>
+    </section>
+
+    <section id="museu" class="page container" aria-labelledby="title-museu">
+      <div class="backbar"><button class="btn outline" onclick="goTo('#pontos')">← Voltar</button></div>
+      <div class="detail">
+        <h3 id="title-museu">Museu Oswaldo Aranha</h3>
+        <p>Breve história (exemplo): o museu preserva documentos e objetos ligados a Oswaldo Aranha, figura central da diplomacia brasileira no século XX.</p>
+        <audio controls style="width:100%; margin: 10px 0 18px;">
+          <source src="assets/audio/museu.mp3" type="audio/mpeg" />
+        </audio>
+        <div class="gallery">
+          <img src="https://scontent.furg2-1.fna.fbcdn.net/v/t39.30808-6/271778600_4879408015483231_6047311902649861630_n.jpg?stp=dst-jpg_p180x540_tt6&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=a0nZO5b4U9cQ7kNvwHsSJZ7&_nc_oc=AdnRfn7VW93ys0iGCvm1Uq4JyXiFeP5bW35wLHdgJHNFoAQVunQMAZ13odpCY-q2O5E&_nc_zt=23&_nc_ht=scontent.furg2-1.fna&_nc_gid=t8CYS5liXkNThNQ2Z6O_hw&oh=00_AfVYf0CezevJeAZujq68jIhgVJMc3G7IT-VUEgbQEZgrLg&oe=68ADAE4B" alt="Exposição (ilustrativa)" />
+          <img src="https://scontent.furg2-1.fna.fbcdn.net/v/t39.30808-6/481251080_1487294459055306_1541718106692135750_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=1RQy4V-HTCwQ7kNvwGtetOv&_nc_oc=AdkA8v0F_PXWaSnuoaSmaLD8DgTte3S9URewU2tPctjIBf2ptQgYBYYB4t_xXabgYOM&_nc_zt=23&_nc_ht=scontent.furg2-1.fna&_nc_gid=-xRv2G3CCFppAuy7g3js8Q&oh=00_AfV-bQ0zyvqblB6wJBwnF8zsWoJ-cLVyp2nnozB-tLYkFA&oe=68AD9EFE" alt="Documentos históricos (ilustrativa)" />
+          <img src="https://www.estado.rs.gov.br/upload/recortes/201706/21090357_187769_GDO.jpg" alt="Salas do museu (ilustrativa)" />
+        </div>
+        <p style="margin-top:14px"><button class="btn" onclick="alert('Simulação AR em breve!')">🕶️ Realidade Aumentada (beta)</button></p>
+      </div>
+    </section>
+
+    <section id="praca" class="page container" aria-labelledby="title-praca">
+      <div class="backbar"><button class="btn outline" onclick="goTo('#pontos')">← Voltar</button></div>
+      <div class="detail">
+        <h3 id="title-praca">Praça Getúlio Vargas</h3>
+        <p>Breve história (exemplo): coração do convívio social, palco de feiras e eventos, com arborização e monumentos que resgatam a memória local.</p>
+        <audio controls style="width:100%; margin: 10px 0 18px;">
+          <source src="assets/audio/praca.mp3" type="audio/mpeg" />
+        </audio>
+        <div class="gallery">
+          <img src="https://www.alegretetudo.com.br/wp-content/uploads/2023/06/alegretetudo-edicao-inedita-da-feira-do-livro-de-alegrete-em-outubro-e-na-praca-getulio-vargas-praca-2.jpg" alt="Praça antiga (ilustrativa)" />
+          <img src="https://live.staticflickr.com/6153/6172843330_26b51927df_b.jpg" alt="Praça atual (ilustrativa)" />
+          <img src="https://www.alegretetudo.com.br/wp-content/uploads/2023/06/alegretetudo-edicao-inedita-da-feira-do-livro-de-alegrete-em-outubro-e-na-praca-getulio-vargas-praca-1-678x381.jpg" alt="Detalhe da praça (ilustrativa)" />
+        </div>
+        <p style="margin-top:14px"><button class="btn" onclick="alert('Simulação AR em breve!')">🕶️ Realidade Aumentada (beta)</button></p>
+      </div>
+    </section>
+
+    <section id="monumentos" class="page container" aria-labelledby="title-monumentos">
+      <div class="backbar"><button class="btn outline" onclick="goTo('#pontos')">← Voltar</button></div>
+      <div class="detail">
+        <h3 id="title-monumentos">Monumento Expedicionário</h3>
+        <p>Breve história (exemplo): marcos que celebram a Revolução Farroupilha, evidenciando a identidade e as tradições gaúchas.</p>
+        <audio controls style="width:100%; margin: 10px 0 18px;">
+          <source src="assets/audio/monumentos.mp3" type="audio/mpeg" />
+        </audio>
+        <div class="gallery">
+          <img src="https://www.alegretetudo.com.br/wp-content/uploads/2020/09/Patria-678x381.jpg" alt="Monumento (ilustrativa)" />
+          <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/87/50/1a/praca-central-de-alegre_r.jpg?w=1200&h=-1&s=1" alt="Escultura (ilustrativa)" />
+          <img src="https://www.alegretetudo.com.br/wp-content/uploads/2023/09/alegretetudo-escoteiros-atuam-na-guarda-do-fogo-simbolico-no-monumento-ao-expedicionario-escoteiros-guarda-678x381.jpg" alt="Detalhe histórico (ilustrativa)" />
+        </div>
+        <p style="margin-top:14px"><button class="btn" onclick="alert('Simulação AR em breve!')">🕶️ Realidade Aumentada (beta)</button></p>
+      </div>
+    </section>
+
+    <!-- ====== Benefícios ====== -->
+    <section id="beneficios">
+      <div class="container">
+        <h2 class="section-title">Benefícios para a Cidade</h2>
+        <p class="section-sub">A iniciativa apoia o turismo local, movimenta o comércio e valoriza a cultura da região.</p>
+        <div class="benefits">
+          <div class="benefit"><h4>🌆 Turismo fortalecido</h4><p>Atraí visitantes com experiências digitais e roteiros guiados por QR Codes.</p></div>
+          <div class="benefit"><h4>🛍️ Comércio aquecido</h4><p>Maior fluxo de pessoas em áreas centrais e pontos históricos.</p></div>
+          <div class="benefit"><h4>🎭 Cultura valorizada</h4><p>Preserva e divulga memória local com áudios, fotos antigas e conteúdos 3D.</p></div>
+          <div class="benefit"><h4>🧭 Fácil expansão</h4><p>Novos pontos e mídias podem ser adicionados rapidamente pela equipe.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ====== Rodapé ====== -->
+  <footer>
+    <div class="container" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; align-items:center;">
+      <p>Contato do projeto: <a href="mailto:contato@touralegrete.com.br">contato@touralegrete.com.br</a></p>
+      <div class="partners">
+        <span class="logo-badge">🤝 Senac Alegrete</span>
+        <span class="logo-badge">🏛️ Prefeitura de Alegrete</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====== JS: navegação interna por hash ====== -->
+  <script>
+    // Mostra/oculta páginas internas de acordo com o hash (SPA simples)
+    function applyRoute() {
+      const hash = location.hash || "";
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(p => p.classList.remove('active'));
+
+      if (["#catedral", "#museu", "#praca", "#monumentos"].includes(hash)) {
+        document.querySelector(hash)?.classList.add('active');
+        document.getElementById('home').classList.add('hidden');
+        document.querySelector('#pontos').classList.add('hidden');
+        document.querySelector('#como-funciona').classList.add('hidden');
+        document.querySelector('#beneficios').classList.add('hidden');
+      } else {
+        // volta para home
+        document.getElementById('home').classList.remove('hidden');
+        document.querySelector('#pontos').classList.remove('hidden');
+        document.querySelector('#como-funciona').classList.remove('hidden');
+        document.querySelector('#beneficios').classList.remove('hidden');
+      }
+    }
+
+    function goTo(id) { location.hash = id; }
+
+    window.addEventListener('hashchange', applyRoute);
+    window.addEventListener('DOMContentLoaded', applyRoute);
+  </script>
+</body>
+</html>
